@@ -45,7 +45,7 @@ struct Provider: AppIntentTimelineProvider {
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
         var entries: [SimpleEntry] = []
         
-        if let userDefaults = UserDefaults(suiteName: "group.com.antique.Folium"), let data = userDefaults.data(forKey: "user") {
+        if let userDefaults = UserDefaults(suiteName: "group.com.jr.Folium"), let data = userDefaults.data(forKey: "user") {
             do {
                 let user = try JSONDecoder().decode(User.self, from: data)
                 user.games.forEach { game in
@@ -111,7 +111,7 @@ struct LastPlayedWidgetEntryView : View {
     }
 
     var body: some View {
-        if let userDefaults = UserDefaults(suiteName: "group.com.antique.Folium"), userDefaults.bool(forKey: "additionalFeaturesAreAllowed") {
+        if let userDefaults = UserDefaults(suiteName: "group.com.jr.Folium"), userDefaults.bool(forKey: "additionalFeaturesAreAllowed") {
             VStack(alignment: .leading) {
                 Image(uiImage: image)
                     .resizable()

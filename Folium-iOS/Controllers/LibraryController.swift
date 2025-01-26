@@ -31,7 +31,7 @@ class LibraryController: UICollectionViewController {
         title = "Library"
         
         let user = Auth.auth().currentUser
-        let userDefaults = UserDefaults(suiteName: "group.com.antique.Folium")
+        let userDefaults = UserDefaults(suiteName: "group.com.jr.Folium")
         Task {
             if AppStoreCheck.shared.additionalFeaturesAreAllowed, let user {
                 let document = Firestore.firestore().collection("users").document(user.uid)

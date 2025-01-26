@@ -76,7 +76,7 @@ class LastPlayedPlayTimeController : UIViewController {
         }
         
         let user = Auth.auth().currentUser
-        let userDefaults = UserDefaults(suiteName: "group.com.antique.Folium")
+        let userDefaults = UserDefaults(suiteName: "group.com.jr.Folium")
         let sha256 = game.fileDetails.sha256
         
         Task {

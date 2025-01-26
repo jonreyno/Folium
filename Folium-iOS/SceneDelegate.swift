@@ -65,7 +65,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         configureDefaultUserDefaults()
         
-        if let userDefaults = UserDefaults(suiteName: "group.com.antique.Folium") {
+        if let userDefaults = UserDefaults(suiteName: "group.com.jr.Folium") {
             userDefaults.set(AppStoreCheck.shared.additionalFeaturesAreAllowed, forKey: "additionalFeaturesAreAllowed")
             WidgetCenter.shared.reloadAllTimelines()
         }

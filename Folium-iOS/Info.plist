@@ -61,7 +61,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.app</string>
+			<string>com.jr.Folium-iOS.app</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -78,7 +78,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.cci</string>
+			<string>com.jr.Folium-iOS.cci</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -95,7 +95,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.cia</string>
+			<string>com.jr.Folium-iOS.cia</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -112,7 +112,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.cxi</string>
+			<string>com.jr.Folium-iOS.cxi</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -129,7 +129,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.3ds</string>
+			<string>com.jr.Folium-iOS.3ds</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -146,7 +146,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.sfc</string>
+			<string>com.jr.Folium-iOS.sfc</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -163,7 +163,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.smc</string>
+			<string>com.jr.Folium-iOS.smc</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -180,7 +180,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.ds</string>
+			<string>com.jr.Folium-iOS.ds</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -197,7 +197,7 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.nds</string>
+			<string>com.jr.Folium-iOS.nds</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
