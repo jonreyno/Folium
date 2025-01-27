@@ -153,7 +153,9 @@ class ControllerThumbstick : UIView {
         centerYConstraint.constant = constrainedY
         stickView.layoutIfNeeded()
         
-        delegate.touchMoved(with: thumbstick.type, position: position(in: self, with: touchLocation), playerIndex: .index1)
+        let joystickPosition = CGPoint(x: constrainedX + halfWidth, y: constrainedY + halfHeight)
+        
+        delegate.touchMoved(with: thumbstick.type, position: position(in: self, with: joystickPosition), playerIndex: .index1)
     }
 }
 
@@ -202,6 +204,7 @@ class DefaultThumbstick : ControllerThumbstick {
                 .applyingSymbolConfiguration(.init(paletteColors: [skin.core == .cytrus ? .white : .label]))
         }
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.alpha = thumbstick.alpha ?? 1
         stickView.addSubview(imageView)
         
         imageView.topAnchor.constraint(equalTo: stickView.topAnchor).isActive = true

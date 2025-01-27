@@ -50,7 +50,7 @@ class ControllerView : PassthroughView {
         guard let imageView else {
             return
         }
-        
+        imageView.alpha = orientation.sharedAlpha ?? 1
         imageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(imageView)
         
@@ -191,7 +191,7 @@ class ControllerView : PassthroughView {
         UIView.transition(with: self, duration: 0.2) {
             self.subviews.filter {
                 $0.isKind(of: ControllerButton.classForCoder()) || $0.isKind(of: ControllerThumbstick.classForCoder())
-            }.forEach { $0.alpha = 1 }
+            }.forEach { $0.alpha = self.orientation.sharedAlpha ?? 1 }
         }
     }
     

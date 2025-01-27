@@ -186,7 +186,7 @@ class DefaultButton : ControllerButton {
                     .applyingSymbolConfiguration(.init(paletteColors: [colors.0, colors.1]))
             }
         }
-        
+        imageView.alpha = button.alpha ?? 1
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
         addSubview(imageView)

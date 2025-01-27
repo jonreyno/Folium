@@ -42,6 +42,7 @@ var cytrusSkin: Skin? {
     }
     
     let safeAreaInsets = window.safeAreaInsets
+    let screenSafeAreaInserts = UIEdgeInsets(top: window.safeAreaInsets.top, left: 0, bottom: 0, right: 0)
     
     var machine = machine
 #if targetEnvironment(simulator)
@@ -59,7 +60,7 @@ var cytrusSkin: Skin? {
             .iPhone13_1:
         let lrzlzrButtonHeight = Double(45 * (3 / 2))
         
-        let portrait: Orientation = .init(buttons: [
+        let portrait: Orientation = .init(sharedAlpha: 0.2, buttons: [
             .init(x: width - (45 + 10 + safeAreaInsets.right),
                   y: height - (90 + safeAreaInsets.bottom),
                   width: 45,
@@ -141,10 +142,10 @@ var cytrusSkin: Skin? {
                   height: 0,
                   type: .settings)
         ], screens: [
-            .init(x: safeAreaInsets.left,
-                  y: safeAreaInsets.top,
-                  width: width - (safeAreaInsets.left + safeAreaInsets.right),
-                  height: height - (safeAreaInsets.top + safeAreaInsets.bottom))
+            .init(x: screenSafeAreaInserts.left,
+                  y: screenSafeAreaInserts.top,
+                  width: width - (screenSafeAreaInserts.left + screenSafeAreaInserts.right),
+                  height: height - (screenSafeAreaInserts.top + screenSafeAreaInserts.bottom))
         ], thumbsticks: [
             .init(x: 10 + safeAreaInsets.left,
                   y: height - (135 + safeAreaInsets.bottom),
@@ -202,7 +203,7 @@ var cytrusSkin: Skin? {
             .iPhone16_2,
             .iPhone16_3,
             .iPhone16_4:
-        let portrait: Orientation = .init(buttons: [
+        let portrait: Orientation = .init(sharedAlpha: 0.2, buttons: [
             .init(x: width - (50 + 10 + safeAreaInsets.right),
                   y: height - (100 + safeAreaInsets.bottom),
                   width: 50,
@@ -279,10 +280,10 @@ var cytrusSkin: Skin? {
                   height: 50,
                   type: .zr)
         ], screens: [
-            .init(x: safeAreaInsets.left,
-                  y: safeAreaInsets.top,
-                  width: width - (safeAreaInsets.left + safeAreaInsets.right),
-                  height: height - (safeAreaInsets.top + safeAreaInsets.bottom))
+            .init(x: screenSafeAreaInserts.left,
+                  y: screenSafeAreaInserts.top,
+                  width: width - (screenSafeAreaInserts.left + screenSafeAreaInserts.right),
+                  height: height - (screenSafeAreaInserts.top + screenSafeAreaInserts.bottom))
         ], thumbsticks: [
             .init(x: 10 + safeAreaInsets.left,
                   y: height - (150 + safeAreaInsets.bottom),
@@ -370,7 +371,7 @@ var cytrusSkin: Skin? {
             .iPadPro7Gen_2,
             .iPadPro7Gen_3,
             .iPadPro7Gen_4:
-        let portrait: Orientation = .init(buttons: [
+        let portrait: Orientation = .init(sharedAlpha: 0.2, buttons: [
             .init(x: width - (50 + 10 + safeAreaInsets.right),
                   y: height - (100 + safeAreaInsets.bottom),
                   width: 50,
@@ -447,10 +448,10 @@ var cytrusSkin: Skin? {
                   height: 50,
                   type: .zr)
         ], screens: [
-            .init(x: safeAreaInsets.left,
-                  y: safeAreaInsets.top,
-                  width: width - (safeAreaInsets.left + safeAreaInsets.right),
-                  height: height - (safeAreaInsets.top + safeAreaInsets.bottom))
+            .init(x: screenSafeAreaInserts.left,
+                  y: screenSafeAreaInserts.top,
+                  width: width - (screenSafeAreaInserts.left + screenSafeAreaInserts.right),
+                  height: height - (screenSafeAreaInserts.top + screenSafeAreaInserts.bottom))
         ], thumbsticks: [
             .init(x: 10 + safeAreaInsets.left,
                   y: height - (150 + safeAreaInsets.bottom),
