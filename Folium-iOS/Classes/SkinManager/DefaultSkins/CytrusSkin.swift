@@ -42,7 +42,7 @@ var cytrusSkin: Skin? {
     }
     
     let safeAreaInsets = window.safeAreaInsets
-    let screenSafeAreaInserts = UIEdgeInsets(top: window.safeAreaInsets.top, left: 0, bottom: 0, right: 0)
+    let screenSafeAreaInsets = UIEdgeInsets(top: window.safeAreaInsets.top, left: 0, bottom: 0, right: 0)
     
     var machine = machine
 #if targetEnvironment(simulator)
@@ -142,10 +142,10 @@ var cytrusSkin: Skin? {
                   height: 0,
                   type: .settings)
         ], screens: [
-            .init(x: screenSafeAreaInserts.left,
-                  y: screenSafeAreaInserts.top,
-                  width: width - (screenSafeAreaInserts.left + screenSafeAreaInserts.right),
-                  height: height - (screenSafeAreaInserts.top + screenSafeAreaInserts.bottom))
+            .init(x: screenSafeAreaInsets.left,
+                  y: screenSafeAreaInsets.top,
+                  width: width - (screenSafeAreaInsets.left + screenSafeAreaInsets.right),
+                  height: height - (screenSafeAreaInsets.top + screenSafeAreaInsets.bottom))
         ], thumbsticks: [
             .init(x: 10 + safeAreaInsets.left,
                   y: height - (135 + safeAreaInsets.bottom),
@@ -280,10 +280,10 @@ var cytrusSkin: Skin? {
                   height: 50,
                   type: .zr)
         ], screens: [
-            .init(x: screenSafeAreaInserts.left,
-                  y: screenSafeAreaInserts.top,
-                  width: width - (screenSafeAreaInserts.left + screenSafeAreaInserts.right),
-                  height: height - (screenSafeAreaInserts.top + screenSafeAreaInserts.bottom))
+            .init(x: screenSafeAreaInsets.left,
+                  y: screenSafeAreaInsets.top,
+                  width: width - (screenSafeAreaInsets.left + screenSafeAreaInsets.right),
+                  height: height - (screenSafeAreaInsets.top + screenSafeAreaInsets.bottom))
         ], thumbsticks: [
             .init(x: 10 + safeAreaInsets.left,
                   y: height - (150 + safeAreaInsets.bottom),
@@ -448,10 +448,10 @@ var cytrusSkin: Skin? {
                   height: 50,
                   type: .zr)
         ], screens: [
-            .init(x: screenSafeAreaInserts.left,
-                  y: screenSafeAreaInserts.top,
-                  width: width - (screenSafeAreaInserts.left + screenSafeAreaInserts.right),
-                  height: height - (screenSafeAreaInserts.top + screenSafeAreaInserts.bottom))
+            .init(x: screenSafeAreaInsets.left,
+                  y: screenSafeAreaInsets.top,
+                  width: width - (screenSafeAreaInsets.left + screenSafeAreaInsets.right),
+                  height: height - (screenSafeAreaInsets.top + screenSafeAreaInsets.bottom))
         ], thumbsticks: [
             .init(x: 10 + safeAreaInsets.left,
                   y: height - (150 + safeAreaInsets.bottom),
