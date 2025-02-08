@@ -1049,7 +1049,6 @@
 		E6ACCBF52CE5EC3900C27006 /* xbyak_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xbyak_util.h; sourceTree = "<group>"; };
 		E6ACCBF82CE5EC3900C27006 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		E6ACCBF92CE5EC3900C27006 /* Cytrus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cytrus.swift; sourceTree = "<group>"; };
-		E6ACCBFA2CE5EC3900C27006 /* LICENSE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
 		E6ACCBFB2CE5EC3900C27006 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E6ACCBFD2CE5EC3900C27006 /* chainresampler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = chainresampler.cpp; sourceTree = "<group>"; };
 		E6ACCBFE2CE5EC3900C27006 /* i0.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = i0.cpp; sourceTree = "<group>"; };
@@ -2749,7 +2748,6 @@
 				E6ACCBF72CE5EC3900C27006 /* Dependencies */,
 				E6ACCBF82CE5EC3900C27006 /* .gitignore */,
 				E6ACCBF92CE5EC3900C27006 /* Cytrus.swift */,
-				E6ACCBFA2CE5EC3900C27006 /* LICENSE.md */,
 				E6ACCBFB2CE5EC3900C27006 /* README.md */,
 			);
 			path = Cytrus;
@@ -3686,12 +3684,13 @@
 					"/Users/jonreyno/VulkanSDK/VulkanMemoryAllocator-3.2.0/include",
 					/opt/homebrew/Cellar/sdl2/2.30.11/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Dependencies/XCFrameworks",
 				);
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -3747,12 +3746,13 @@
 					"/Users/jonreyno/VulkanSDK/VulkanMemoryAllocator-3.2.0/include",
 					/opt/homebrew/Cellar/sdl2/2.30.11/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Dependencies/XCFrameworks",
 				);
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -3781,7 +3781,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z3ZEABYY6P;
 				"GCC_WARN_64_TO_32_BIT_CONVERSION[arch=*64]" = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -3815,7 +3815,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Z3ZEABYY6P;
 				"GCC_WARN_64_TO_32_BIT_CONVERSION[arch=*64]" = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -4080,7 +4080,7 @@
 					"$(PROJECT_DIR)/Dependencies/XCFrameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				MARKETING_VERSION = 1.15;
+				MARKETING_VERSION = 1.14;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jr.Folium-iOS";
@@ -4140,7 +4140,7 @@
 					"$(PROJECT_DIR)/Dependencies/XCFrameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
-				MARKETING_VERSION = 1.15;
+				MARKETING_VERSION = 1.14;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jr.Folium-iOS";
