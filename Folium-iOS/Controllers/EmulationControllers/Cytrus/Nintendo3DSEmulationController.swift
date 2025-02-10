@@ -111,6 +111,10 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
             }),
             UIAction(title: "Load Amiibo", handler: { [weak self] _ in self?.openDocumentPickerController()
             }),
+            UIAction(title: "Swap Screen", handler: { [weak self] _ in
+                if let isPortrait = self?.interfaceOrientation.isPortrait {
+                    Cytrus.shared.swapScreen(!Cytrus.shared.isScreenSwapped(), isPortrait)}
+            }),
             UIAction(title: "Toggle Play/Pause", handler: { _ in
                 Cytrus.shared.pausePlay(Cytrus.shared.isPaused())
             }),
