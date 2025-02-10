@@ -278,8 +278,18 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
                 return
             }
             
-            Cytrus.shared.pausePlay(applicationState == .foregrounded)
-        }
+            switch applicationState {
+            case .foregrounded:
+                Cytrus.shared.pausePlay(true)
+            case .resignactive, .backgrounded, .disconnected:
+                Cytrus.shared.pausePlay(false)
+            case .becameactive:
+                self?.updateOrientation()
+                Cytrus.shared.pausePlay(true)
+            @unknown default:
+                break
+            }
+        })
         
         NotificationCenter.default.addObserver(forName: .init("openKeyboard"), object: nil, queue: .main) { notification in
             guard let config = notification.object as? KeyboardConfig else {
@@ -347,33 +357,37 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
     
     override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate { _ in } completion: { _ in
-            let skin = if let url = self.skin.url {
-                try? SkinManager.shared.skin(from: url)
-            } else {
-                cytrusSkin
-            }
-            
-            guard let skin, let metalView = self.metalView, let controllerView = self.controllerView else {
-                return
-            }
-            
-            self.skin = skin
-            
-            guard let orientation = skin.orientation(for: self.interfaceOrientation()) else {
-                return
-            }
-            
-            controllerView.updateFrames(for: orientation, controllerDisconnected: GCController.controllers().isEmpty)
-            
-            metalView.frame = if !orientation.screens.isEmpty, let screen = orientation.screens.first {
-                .init(x: screen.x, y: screen.y, width: screen.width, height: screen.height)
-            } else {
-                self.view.bounds
-            }
-            
-            Cytrus.shared.orientationChange(with: self.interfaceOrientation(), using: metalView)
+        coordinator.animate { _ in } completion: { [weak self] _ in
+            self?.updateOrientation()
         }
+    }
+    
+    func updateOrientation() {
+        let skin = if let url = self.skin.url {
+            try? SkinManager.shared.skin(from: url)
+        } else {
+            cytrusSkin
+        }
+        
+        guard let skin, let metalView = self.metalView, let controllerView = self.controllerView else {
+            return
+        }
+        
+        self.skin = skin
+        
+        guard let orientation = skin.orientation(for: self.interfaceOrientation()) else {
+            return
+        }
+        
+        controllerView.updateFrames(for: orientation, controllerDisconnected: GCController.controllers().isEmpty)
+        
+        metalView.frame = if !orientation.screens.isEmpty, let screen = orientation.screens.first {
+            .init(x: screen.x, y: screen.y, width: screen.width, height: screen.height)
+        } else {
+            self.view.bounds
+        }
+        
+        Cytrus.shared.orientationChange(with: self.interfaceOrientation(), using: metalView)
     }
     
     @objc fileprivate func boot() {
