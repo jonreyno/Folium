@@ -33,6 +33,8 @@
 	</dict>
 	<key>UIFileSharingEnabled</key>
 	<true/>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -216,13 +218,31 @@
 			<key>UTTypeDescription</key>
 			<string>Folium Content File</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.antique.Folium-iOS.ps1</string>
+			<string>com.jr.Folium-iOS.ps1</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
 					<string>bin</string>
 					<string>cue</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.archive</string>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Folium Content File</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.jr.Folium-iOS.bin</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>bin</string>
 				</array>
 			</dict>
 		</dict>
