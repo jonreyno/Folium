@@ -109,6 +109,8 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
                 }
                 self.present(cytrusSettingsController, animated: true)
             }),
+            UIAction(title: "Load Amiibo", handler: { [weak self] _ in self?.openDocumentPickerController()
+            }),
             UIAction(title: "Toggle Play/Pause", handler: { _ in
                 Cytrus.shared.pausePlay(Cytrus.shared.isPaused())
             }),
@@ -405,6 +407,44 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
     }
 }
 
+// MARK: Amiibo Selector
+extension Nintendo3DSEmulationController: UIDocumentPickerDelegate {
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        controller.dismiss(animated: true)
+    }
+    
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
+        let task = Task {
+            if url.pathExtension.lowercased() == "bin" {
+                _ = Cytrus.shared.loadAmiibo(with: url)
+            }
+        }
+        
+        Task {
+            switch await task.result {
+            case .failure(let error):
+                print("\(#function): failed: \(error.localizedDescription)")
+            case .success(_):
+                print("\(#function): success")
+            }
+        }
+    }
+}
+
+extension Nintendo3DSEmulationController {
+    @objc fileprivate func openDocumentPickerController() {
+        let documentPickerController = UIDocumentPickerViewController(forOpeningContentTypes: [
+            .archive
+        ], asCopy: true)
+        documentPickerController.delegate = self
+        documentPickerController.allowsMultipleSelection = false
+        
+        if let sheetPresentationController = documentPickerController.sheetPresentationController {
+            sheetPresentationController.detents = [.medium(), .large()]
+        }
+        
+        present(documentPickerController, animated: true)
+    }
 }
 
 // MARK: Touches
