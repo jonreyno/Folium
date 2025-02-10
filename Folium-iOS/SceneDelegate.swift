@@ -154,6 +154,7 @@ extension SceneDelegate {
                 "new3DS" : true,
                 "lleApplets" : false,
                 "regionValue" : -1,
+                "playCoins" : 300,
                 
                 "layoutOption" : 6,
                 
@@ -180,7 +181,10 @@ extension SceneDelegate {
                 "render3D" : 0,
                 "factor3D" : 0,
                 "monoRender" : 0,
+                "dumpTextures" : false,
+                "customTextures" : false,
                 "preloadTextures" : false,
+                "asyncCustomLoading" : true,
                 
                 "audioMuted" : false,
                 "audioEmulation" : 0,

@@ -289,7 +289,14 @@ class CytrusSettingsController : UICollectionViewController {
                                     "Taiwan" : 6
                                   ],
                                   selectedValue: UserDefaults.standard.value(forKey: "cytrus.regionValue"),
-                                  delegate: self)
+                                  delegate: self),
+            settingsKit.inputNumber(key: "cytrus.playCoins",
+                                    title: "Play Coins",
+                                    details: "Set the number of play coins available",
+                                    min: 0,
+                                    max: 300,
+                                    value: Double(Cytrus.shared.playCoins),
+                                    delegate: self),
         ], toSection: CytrusSettingsHeaders.core)
         
         var debuggingItems: [AHS] = [
@@ -487,10 +494,25 @@ class CytrusSettingsController : UICollectionViewController {
                                   ],
                                   selectedValue: UserDefaults.standard.value(forKey: "cytrus.monoRender"),
                                   delegate: self),
+            settingsKit.bool(key: "cytrus.dumpTextures",
+                             title: "Dump Textures",
+                             details: "Dump textures to PNG files. Textures are dumped to /dump/textures/[TitleId]/",
+                             value: UserDefaults.standard.bool(forKey: "cytrus.dumpTextures"),
+                             delegate: self),
+            settingsKit.bool(key: "cytrus.customTextures",
+                             title: "Use Custom Textures",
+                             details: "Replace textures with PNG files. Textures are loaded from /load/textures/[TitleId]/",
+                             value: UserDefaults.standard.bool(forKey: "cytrus.customTextures"),
+                             delegate: self),
             settingsKit.bool(key: "cytrus.preloadTextures",
                              title: "Preload Textures",
                              details: "Loads all custom textures into memory. This feature can use a lot of memory",
                              value: UserDefaults.standard.bool(forKey: "cytrus.preloadTextures"),
+                             delegate: self),
+            settingsKit.bool(key: "cytrus.asyncCustomLoading",
+                             title: "Async Texture Loading",
+                             details: "Load custom textures asynchronously with background threads to reduce loading stutter",
+                             value: UserDefaults.standard.bool(forKey: "cytrus.asyncCustomLoading"),
                              delegate: self)
         ], toSection: CytrusSettingsHeaders.rendering)
         
@@ -620,6 +642,9 @@ extension CytrusSettingsController : SettingDelegate {
             boolSetting.value = UserDefaults.standard.bool(forKey: boolSetting.key)
         case let inputNumberSetting as InputNumberSetting:
             inputNumberSetting.value = UserDefaults.standard.double(forKey: inputNumberSetting.key)
+            if (inputNumberSetting.key == "cytrus.playCoins"){
+                Cytrus.shared.playCoins = UInt16(inputNumberSetting.value)
+            }
         case let inputStringSetting as InputStringSetting:
             inputStringSetting.value = UserDefaults.standard.string(forKey: inputStringSetting.key)
         case let stepperSetting as StepperSetting:
