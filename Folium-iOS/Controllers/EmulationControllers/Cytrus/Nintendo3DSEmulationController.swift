@@ -55,6 +55,14 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
             return
         }
         
+        metalView.isUserInteractionEnabled=true
+        metalView.colorPixelFormat = .bgra8Unorm;
+        metalView.depthStencilPixelFormat = .depth32Float
+        metalView.translatesAutoresizingMaskIntoConstraints = false
+        metalView.preferredFramesPerSecond = 120
+        
+        setResolution(metalView: metalView, resolutionFactor: 2)
+        
         controllerView = .init(orientation: orientation, skin: skin, delegates: (self, self))
         guard let controllerView else {
             return
@@ -365,6 +373,38 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
     @objc fileprivate func boot() {
         Cytrus.shared.insertCartridgeAndBoot(with: game.fileDetails.url)
     }
+    
+    func setResolution(metalView: MTKView, resolutionFactor: CGFloat) {
+        let scale:CGFloat = UIScreen.main.scale
+        if (scale != 1.0) {
+            metalView.layer.contentsScale = scale;
+            metalView.layer.rasterizationScale = scale;
+            metalView.contentScaleFactor = scale;
+        }
+        let gameScreenSize=metalView.bounds.size
+        let screenBounds=metalView.bounds
+        // Resize masks
+        metalView.layer.anchorPoint=CGPoint(x: 0, y: 0)
+        let gameFrameSize = CGRect(x: metalView.frame.minX - gameScreenSize.width/2,
+                                   y: metalView.frame.minY - gameScreenSize.height/2,
+                                   width: (CGFloat)(gameScreenSize.width * CGFloat(resolutionFactor)),
+                                   height: (CGFloat)(gameScreenSize.height * CGFloat(resolutionFactor)))
+        metalView.layer.frame = gameFrameSize
+        metalView.drawableSize=CGSize(width: gameFrameSize.width, height: gameFrameSize.height)
+
+        metalView.autoResizeDrawable = true
+        metalView.autoresizingMask  = [.flexibleHeight, .flexibleWidth,
+                                  .flexibleRightMargin,
+                                  .flexibleLeftMargin]
+        // Adjust to Resolution Upscaled Vulkan Render
+        let xScale = screenBounds.width / (CGFloat)(gameScreenSize.width * CGFloat(resolutionFactor));
+        let yScale = screenBounds.height / (CGFloat)(gameScreenSize.height * CGFloat(resolutionFactor));
+        metalView.layer.setAffineTransform(CGAffineTransform(scaleX: xScale, y: yScale))
+        metalView.autoresizesSubviews = true
+        metalView.contentMode = .scaleToFill
+    }
+}
+
 }
 
 // MARK: Touches
