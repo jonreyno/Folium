@@ -142,7 +142,8 @@ class ControllerThumbstick : UIView {
         let angle = atan2(distanceFromCenter.y, distanceFromCenter.x)
         let distance = sqrt(pow(distanceFromCenter.x, 2) + pow(distanceFromCenter.y, 2))
         
-        let maxDraggableDistance = min(halfWidth, halfHeight) * 0.9
+        let joystickMaxTilt: CGFloat = 0.5
+        let maxDraggableDistance = min(halfWidth, halfHeight) * joystickMaxTilt
         
         let constrainedDistance = min(distance, maxDraggableDistance)
         
@@ -153,7 +154,7 @@ class ControllerThumbstick : UIView {
         centerYConstraint.constant = constrainedY
         stickView.layoutIfNeeded()
         
-        let joystickPosition = CGPoint(x: constrainedX + halfWidth, y: constrainedY + halfHeight)
+        let joystickPosition = CGPoint(x: constrainedX * 1/joystickMaxTilt + halfWidth, y: constrainedY * 1/joystickMaxTilt + halfHeight)
         
         delegate.touchMoved(with: thumbstick.type, position: position(in: self, with: joystickPosition), playerIndex: .index1)
     }
