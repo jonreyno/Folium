@@ -13,8 +13,11 @@ import MetalKit
 import UIKit
 
 class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
+    private var notificationObservers: [NSObjectProtocol] = []
     var controllerView: ControllerView? = nil
     var metalView: MTKView? = nil
+    var dismissHandler: (() -> Void)?
+    private var GCTask: Task<Void, Error>?
     
     var skin: Skin
     init(game: Nintendo3DSGame, skin: Skin) {
@@ -25,6 +28,71 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        print("🚨 Nintendo3DSEmulationController deinit called")
+        dismissHandler = nil
+    }
+    
+    private func cleanup() {
+        print("🧹 Starting cleanup sequence")
+        
+        if Cytrus.shared.stopped() {
+            Cytrus.shared.deallocateMetalLayers()
+            Cytrus.shared.deallocateVulkanLibrary()
+        }
+        
+        // Clean up gamepad handlers
+        GCController.controllers().forEach { controller in
+            controller.extendedGamepad?.valueChangedHandler = nil
+            controller.extendedGamepad?.buttonA.pressedChangedHandler = nil
+            controller.extendedGamepad?.buttonB.pressedChangedHandler = nil
+            controller.extendedGamepad?.buttonX.pressedChangedHandler = nil
+            controller.extendedGamepad?.buttonY.pressedChangedHandler = nil
+            controller.extendedGamepad?.dpad.up.pressedChangedHandler = nil
+            controller.extendedGamepad?.dpad.down.pressedChangedHandler = nil
+            controller.extendedGamepad?.dpad.left.pressedChangedHandler = nil
+            controller.extendedGamepad?.dpad.right.pressedChangedHandler = nil
+            controller.extendedGamepad?.leftThumbstick.valueChangedHandler = nil
+            controller.extendedGamepad?.rightThumbstick.valueChangedHandler = nil
+            controller.extendedGamepad?.leftShoulder.pressedChangedHandler = nil
+            controller.extendedGamepad?.rightShoulder.pressedChangedHandler = nil
+            controller.extendedGamepad?.leftTrigger.pressedChangedHandler = nil
+            controller.extendedGamepad?.rightTrigger.pressedChangedHandler = nil
+            controller.extendedGamepad?.buttonOptions?.pressedChangedHandler = nil
+            controller.extendedGamepad?.buttonMenu.pressedChangedHandler = nil
+            controller.extendedGamepad?.buttonHome?.pressedChangedHandler = nil
+        }
+        GCController.stopWirelessControllerDiscovery()
+        GCTask?.cancel()
+        
+        metalView?.device = nil
+        metalView?.delegate = nil
+        metalView?.removeFromSuperview()
+        metalView = nil
+        
+        controllerView?.delegates = (nil, nil)
+        controllerView?.removeFromSuperview()
+        controllerView = nil
+        
+        notificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
+        notificationObservers.removeAll()
+        
+        timer?.invalidate()
+        timer = nil
+        
+        // Remove from view hierarchy
+        children.forEach { $0.removeFromParent() }
+        view.removeFromSuperview()
+        
+        if let picker = presentedViewController as? UIDocumentPickerViewController {
+            picker.delegate = nil
+        }
+        
+        // Make sure we break any potential retain cycles with parent
+        self.presentingViewController?.dismiss(animated: false)
+        self.removeFromParent()
     }
     
     override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
@@ -89,16 +157,16 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.showsMenuAsPrimaryAction = true
         button.menu = .init(children: [
-            UIAction(title: "Open Cheats", image: .init(systemName: "hammer"), handler: { _ in
-                guard let game = self.game as? Nintendo3DSGame else {
+            UIAction(title: "Open Cheats", image: .init(systemName: "hammer"), handler: { [weak self] _ in
+                guard let game = self?.game as? Nintendo3DSGame else {
                     return
                 }
                 
                 let cheatsController = UINavigationController(rootViewController: CheatsController(titleIdentifier: game.titleIdentifier))
                 cheatsController.modalPresentationStyle = .fullScreen
-                self.present(cheatsController, animated: true)
+                self?.present(cheatsController, animated: true)
             }),
-            UIAction(title: "Open Settings", image: .init(systemName: "gearshape"), handler: { _ in
+            UIAction(title: "Open Settings", image: .init(systemName: "gearshape"), handler: { [weak self] _ in
                 var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
                 configuration.headerMode = .supplementary
                 let listCollectionViewLayout = UICollectionViewCompositionalLayout.list(using: configuration)
@@ -107,7 +175,7 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
                 if let sheetPresentationController = cytrusSettingsController.sheetPresentationController {
                     sheetPresentationController.detents = [.medium(), .large()]
                 }
-                self.present(cytrusSettingsController, animated: true)
+                self?.present(cytrusSettingsController, animated: true)
             }),
             UIAction(title: "Load Amiibo", handler: { [weak self] _ in self?.openDocumentPickerController()
             }),
@@ -118,14 +186,21 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
             UIAction(title: "Toggle Play/Pause", handler: { _ in
                 Cytrus.shared.pausePlay(Cytrus.shared.isPaused())
             }),
-            UIAction(title: "Stop & Exit", attributes: [.destructive], handler: { _ in
+            UIAction(title: "Stop & Exit", attributes: [.destructive], handler: { [weak self] _ in
                 let alertController = UIAlertController(title: "Stop & Exit", message: "Are you sure?", preferredStyle: .alert)
                 alertController.addAction(.init(title: "Dismiss", style: .cancel))
                 alertController.addAction(.init(title: "Stop & Exit", style: .destructive, handler: { _ in
-                    Cytrus.shared.stop()
-                    self.dismiss(animated: true)
+                    // First, stop emulation
+                    if Cytrus.shared.running() {
+                        Cytrus.shared.stop()
+                    }
+                    // Since we're presented modally, this is the correct dismissal
+                    self?.dismiss(animated: true) { [weak self] in
+                        print("👋 Dismissal complete")
+                        self?.cleanup()
+                    }
                 }))
-                self.present(alertController, animated: true)
+                self?.present(alertController, animated: true)
             })
         ])
         view.addSubview(button)
@@ -133,147 +208,30 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
         button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10).isActive = true
         button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10).isActive = true
         
-        Task {
+        if GCController.controllers().count > 0 {
+            GCController.controllers().forEach { controller in
+                registerGamepad(controller: controller)
+            }
+        }
+        
+        GCTask = Task {
             await GCController.startWirelessControllerDiscovery()
         }
         
-        NotificationCenter.default.addObserver(forName: Notification.Name.GCControllerDidConnect, object: nil, queue: .main) { notification in
-            guard let controller = notification.object as? GCController, let extendedGamepad = controller.extendedGamepad else {
+        notificationObservers.append(NotificationCenter.default.addObserver(forName: Notification.Name.GCControllerDidConnect, object: nil, queue: .main) { [weak self] notification in
+            guard let controller = notification.object as? GCController else {
                 return
             }
-            
-            if let controllerView = self.controllerView {
-                controllerView.hide()
-            }
-            
-            extendedGamepad.buttonA.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .b, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .b, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.buttonB.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .a, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .a, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.buttonX.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .y, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .y, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.buttonY.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .x, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .x, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.dpad.up.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .dpadUp, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .dpadUp, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.dpad.down.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .dpadDown, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .dpadDown, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.dpad.left.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .dpadLeft, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .dpadLeft, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.dpad.right.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .dpadRight, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .dpadRight, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.leftThumbstick.valueChangedHandler = { element, x, y in
-                self.touchMoved(with: .left, position: (x, y), playerIndex: .index1)
-            }
-            
-            extendedGamepad.rightThumbstick.valueChangedHandler = { element, x, y in
-                self.touchMoved(with: .right, position: (x, y), playerIndex: .index1)
-            }
-            
-            extendedGamepad.leftShoulder.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .l, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .l, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.rightShoulder.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .r, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .r, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.leftTrigger.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .zl, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .zl, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.rightTrigger.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .zr, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .zr, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.buttonOptions?.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .minus, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .minus, playerIndex: .index1)
-                }
-            }
-            
-            extendedGamepad.buttonMenu.pressedChangedHandler = { element, value, pressed in
-                if pressed {
-                    self.touchBegan(with: .plus, playerIndex: .index1)
-                } else {
-                    self.touchEnded(with: .plus, playerIndex: .index1)
-                }
-            }
-        }
+            self?.registerGamepad(controller: controller)
+        })
         
-        NotificationCenter.default.addObserver(forName: Notification.Name.GCControllerDidDisconnect, object: nil, queue: .main) { _ in
-            if let controllerView = self.controllerView {
+        notificationObservers.append(NotificationCenter.default.addObserver(forName: Notification.Name.GCControllerDidDisconnect, object: nil, queue: .main) { [weak self] _ in
+            if let controllerView = self?.controllerView {
                 controllerView.show()
             }
-        }
+        })
         
-        NotificationCenter.default.addObserver(forName: .init("applicationStateDidChange"), object: nil, queue: .main) { notification in
+        notificationObservers.append(NotificationCenter.default.addObserver(forName: .init("applicationStateDidChange"), object: nil, queue: .main) { [weak self] notification in
             guard let applicationState = notification.object as? ApplicationState else {
                 return
             }
@@ -291,7 +249,7 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
             }
         })
         
-        NotificationCenter.default.addObserver(forName: .init("openKeyboard"), object: nil, queue: .main) { notification in
+        notificationObservers.append(NotificationCenter.default.addObserver(forName: .init("openKeyboard"), object: nil, queue: .main) { [weak self] notification in
             guard let config = notification.object as? KeyboardConfig else {
                 return
             }
@@ -334,7 +292,145 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
             
             
             alertController.addTextField()
-            self.present(alertController, animated: true)
+            self?.present(alertController, animated: true)
+        })
+    }
+    
+    func registerGamepad(controller: GCController?) {
+        guard let extendedGamepad = controller?.extendedGamepad else {
+            return
+        }
+        
+        if let controllerView = self.controllerView {
+            controllerView.hide()
+        }
+        
+        extendedGamepad.buttonA.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .b, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .b, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.buttonB.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .a, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .a, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.buttonX.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .y, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .y, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.buttonY.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .x, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .x, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.dpad.up.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .dpadUp, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .dpadUp, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.dpad.down.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .dpadDown, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .dpadDown, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.dpad.left.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .dpadLeft, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .dpadLeft, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.dpad.right.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .dpadRight, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .dpadRight, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.leftThumbstick.valueChangedHandler = { [weak self] element, x, y in
+            self?.touchMoved(with: .left, position: (x, y), playerIndex: .index1)
+        }
+        
+        extendedGamepad.rightThumbstick.valueChangedHandler = { [weak self] element, x, y in
+            self?.touchMoved(with: .right, position: (x, y), playerIndex: .index1)
+        }
+        
+        extendedGamepad.leftShoulder.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .l, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .l, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.rightShoulder.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .r, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .r, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.leftTrigger.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .zl, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .zl, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.rightTrigger.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .zr, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .zr, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.buttonOptions?.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .minus, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .minus, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.buttonMenu.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .plus, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .plus, playerIndex: .index1)
+            }
+        }
+        
+        extendedGamepad.buttonHome?.pressedChangedHandler = { [weak self] element, value, pressed in
+            if pressed {
+                self?.touchBegan(with: .home, playerIndex: .index1)
+            } else {
+                self?.touchEnded(with: .home, playerIndex: .index1)
+            }
         }
     }
     
@@ -348,10 +444,8 @@ class Nintendo3DSEmulationController : LastPlayedPlayTimeController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        NotificationCenter.default.removeObserver(self)
-        if Cytrus.shared.stopped() {
-            Cytrus.shared.deallocateVulkanLibrary()
-            Cytrus.shared.deallocateMetalLayers()
+        
+        if isBeingDismissed {
         }
     }
     

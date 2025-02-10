@@ -206,6 +206,15 @@ class LibraryController: UICollectionViewController {
         extractArchivedDocumentsDirectoryIfPossible()
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isBeingDismissed {
+            dataSource = nil
+            snapshot = nil
+            searchSnapshot = nil
+        }
+    }
+    
     func extractArchivedDocumentsDirectoryIfPossible() {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let aarURL = if #available(iOS 16, *) {
@@ -333,7 +342,8 @@ extension LibraryController {
             
             let nintendo3DSEmulationController = Nintendo3DSEmulationController(game: nintendo3DSGame, skin: skin)
             nintendo3DSEmulationController.modalPresentationStyle = .fullScreen
-            present(nintendo3DSEmulationController, animated: true)
+            nintendo3DSEmulationController.dismissHandler = { [weak self] in self?.populateGameLibrary()}
+            present(nintendo3DSEmulationController, animated: true) { [weak self] in self?.collectionView.reloadData()}
         case let superNESGame as SuperNESGame:
             guard let skin = mangoSkin else {
                 return
@@ -494,16 +504,16 @@ extension LibraryController {
         let documentPickerController = UIDocumentPickerViewController(forOpeningContentTypes: [
             .archive,
             
-            .init("com.antique.Folium-iOS.app")!,
-            .init("com.antique.Folium-iOS.cci")!,
-            .init("com.antique.Folium-iOS.cia")!,
-            .init("com.antique.Folium-iOS.cxi")!,
-            .init("com.antique.Folium-iOS.3ds")!,
-            .init("com.antique.Folium-iOS.sfc")!,
-            .init("com.antique.Folium-iOS.smc")!,
-            .init("com.antique.Folium-iOS.ds")!,
-            .init("com.antique.Folium-iOS.nds")!,
-            .init("com.antique.Folium-iOS.ps1")!,
+            .init("com.jr.Folium-iOS.app")!,
+            .init("com.jr.Folium-iOS.cci")!,
+            .init("com.jr.Folium-iOS.cia")!,
+            .init("com.jr.Folium-iOS.cxi")!,
+            .init("com.jr.Folium-iOS.3ds")!,
+            .init("com.jr.Folium-iOS.sfc")!,
+            .init("com.jr.Folium-iOS.smc")!,
+            .init("com.jr.Folium-iOS.ds")!,
+            .init("com.jr.Folium-iOS.nds")!,
+            .init("com.jr.Folium-iOS.ps1")!,
             
             .init("com.retroarch.mtl")!,
             .init("com.retroarch.obj")!,

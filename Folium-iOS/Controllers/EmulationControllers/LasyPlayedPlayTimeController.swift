@@ -39,6 +39,7 @@ struct User : Codable {
 class LastPlayedPlayTimeController : UIViewController {
     var time: TimeInterval = 0
     var timer: Timer? = nil
+    private var updateTask: Task<Void, Error>?
     
     var game: GameBase
     init(game: GameBase) {
@@ -50,15 +51,31 @@ class LastPlayedPlayTimeController : UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        print("🚨 LastPlayedPlayTimeController deinit called")
+        updateTask?.cancel()
+        timer?.invalidate()
+        timer = nil
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        timer = .scheduledTimer(withTimeInterval: 1, repeats: true) { _ in self.time += 1 }
+        timer = .scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            self?.time += 1
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        if let timer { timer.invalidate() }
+        
+        // Cancel any running task
+        updateTask?.cancel()
+        
+        if let timer {
+            timer.invalidate()
+            self.timer = nil
+        }
         
         let icon: Data? = switch game {
         case let nintendoDSGame as NintendoDSGame:
@@ -79,18 +96,20 @@ class LastPlayedPlayTimeController : UIViewController {
         let userDefaults = UserDefaults(suiteName: "group.com.jr.Folium")
         let sha256 = game.fileDetails.sha256
         
-        Task {
-            if AppStoreCheck.shared.additionalFeaturesAreAllowed, let user {
-                if let sha256 {
-                    let document = Firestore.firestore().collection("users").document(user.uid)
-                    var user = try await document.getDocument(as: User.self)
-                    user.updateGame(console: game.core, sha256: sha256, with: Date.now.timeIntervalSince1970, and: self.time, icon: icon)
-                    
-                    try document.setData(from: user, merge: true)
-                    
-                    if let userDefaults {
-                        userDefaults.set(try JSONEncoder().encode(user), forKey: "user")
-                        WidgetCenter.shared.reloadAllTimelines()
+        if isBeingDismissed {
+            updateTask = Task {
+                if AppStoreCheck.shared.additionalFeaturesAreAllowed, let user {
+                    if let sha256 {
+                        let document = Firestore.firestore().collection("users").document(user.uid)
+                        var user = try await document.getDocument(as: User.self)
+                        user.updateGame(console: game.core, sha256: sha256, with: Date.now.timeIntervalSince1970, and: self.time, icon: icon)
+                        
+                        try document.setData(from: user, merge: true)
+                        
+                        if let userDefaults {
+                            userDefaults.set(try JSONEncoder().encode(user), forKey: "user")
+                            WidgetCenter.shared.reloadAllTimelines()
+                        }
                     }
                 }
             }
