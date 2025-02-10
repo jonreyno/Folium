@@ -431,6 +431,10 @@ extension Nintendo3DSEmulationController {
         
         Cytrus.shared.touchMoved(at: touch.location(in: view))
     }
+
+    override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
+        return .all
+    }
 }
 
 // MARK: Button Delegate
