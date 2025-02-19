@@ -198,7 +198,7 @@ struct LibraryManager : @unchecked Sendable {
             
             let title = try Nintendo3DSGame.titleFromHeader(for: url)
             if title.isEmpty {
-                break
+                continue
             }
             
             let nameWithoutExtension = url.lastPathComponent.replacingOccurrences(of: ".\(url.pathExtension)", with: "")
@@ -219,7 +219,7 @@ struct LibraryManager : @unchecked Sendable {
             
             let title = try Nintendo3DSGame.titleFromHeader(for: url)
             if title.isEmpty {
-                break
+                continue
             }
             
             let nameWithoutExtension = url.lastPathComponent.replacingOccurrences(of: ".\(url.pathExtension)", with: "")
@@ -231,6 +231,25 @@ struct LibraryManager : @unchecked Sendable {
                                          skins: skinManager.skins(for: .cytrus),
                                          title: title,
                                          titleIdentifier: try Nintendo3DSGame.titleIdentifierFromHeader(for: url)))
+        }
+        
+        let homeMenu = Cytrus.shared.home().first
+        let homeMenuManual = Cytrus.shared.home().last
+        
+        if (homeMenu != nil && homeMenuManual != nil) {
+            if !coresWithGames.contains(.cytrus) {
+                coresWithGames.append(.cytrus)
+            }
+            
+            let nameWithoutExtension = homeMenu!.lastPathComponent.replacingOccurrences(of: ".\(homeMenu!.pathExtension)", with: "")
+            games.append(Nintendo3DSGame(icon: try Nintendo3DSGame.iconFromHeader(for: homeMenuManual!), core: "Cytrus",
+                                         fileDetails: .init(extension: homeMenu!.pathExtension.lowercased(),
+                                                            name: homeMenu!.lastPathComponent,
+                                                            nameWithoutExtension: nameWithoutExtension,
+                                                            url: homeMenu!),
+                                         skins: skinManager.skins(for: .cytrus),
+                                         title: try Nintendo3DSGame.titleFromHeader(for: homeMenuManual!),
+                                         titleIdentifier: try Nintendo3DSGame.titleIdentifierFromHeader(for: homeMenu!)))
         }
         
         try cores.forEach { core in
